@@ -156,9 +156,6 @@ st.markdown('### 📊 Principais descobertas')
 
 st.info(
     f'''
-A taxa de churn identificada foi de **{taxa_churn:.2f}%**,
-representando **{clientes_cancelados:,} clientes cancelados**.
-
 A categoria **{principal_categoria}** apresentou
 **{quantidade_principal_categoria} cancelamentos**,
 o equivalente a **{percentual_principal_categoria:.1f}%**
@@ -184,13 +181,14 @@ st.markdown("##### ✅ Recomendações")
 
 st.warning(
     '''
-    - Criar campanhas de retenção para clientes com contratos mensais;
-    - Incentivar a migração dos contratos mensais para contratos anuais;
-    - Revisar preços, ofertas e benefícios em relação à concorrência;
-    - Melhorar a qualidade do atendimento e do suporte;
-    - Acompanhar os clientes com baixa satisfação;
-    - Priorizar clientes com alto valor de vida (CLTV);
-    - Desenvolver ofertas personalizadas para clientes com maior risco.
+    - Criar campanhas de retenção para clientes com contrato mensal;
+    - Revisar preços, benefícios e ofertas em relação à concorrência;
+    - Avaliar a qualidade dos equipamentos e serviços oferecidos;
+    - Melhorar o atendimento prestado pelo suporte;
+    - Oferecer benefícios para a migração do contrato mensal para contratos mais longos;
+    - Monitorar clientes com baixa satisfação;
+    - Criar ofertas personalizadas para clientes com maior risco;
+    - Acompanhar continuamente os principais motivos de cancelamento.
     '''
 )
 

@@ -1,4 +1,11 @@
-# --- Função responsável por gerar o relatório --- #
+# --- Importar as traduções do projeto --- #
+from traducao import (
+    traducao_categorias,
+    traducao_motivos,
+    traducao_contratos
+)
+
+# --- Gerar o relatório escrito --- #
 def gerar_relatorio(df):
 
 # --- Indicadores gerais --- #
@@ -11,69 +18,70 @@ def gerar_relatorio(df):
     )
 
     taxa_churn = (
-        clientes_cancelados / total_clientes * 100
+        clientes_cancelados
+        / total_clientes
+        * 100
     )
 
-# --- Principais categorias de cancelamento --- #
-    categorias = (
+    # --- Separar somente os clientes que cancelaram --- #
+    clientes_que_cancelaram = (
         df[df['Churn Label'] == 'Yes']
-        ['Churn Category']
+    )
+
+    # --- Analisar as categorias de cancelamento --- #
+    categorias_cancelamento = (
+        clientes_que_cancelaram['Churn Category']
         .value_counts()
     )
 
-    principal_categoria = categorias.index[0]
-    quantidade_categoria = categorias.iloc[0]
+    principal_categoria = categorias_cancelamento.index[0]
 
-    traducao_categoria = {
-        'Competitor': 'Concorrência',
-        'Attitude': 'Atendimento',
-        'Dissatisfaction': 'Insatisfação',
-        'Price': 'Preço',
-        'Other': 'Outros'
-    }
+    quantidade_principal_categoria = (
+        categorias_cancelamento.iloc[0]
+    )
 
-    principal_categoria = traducao_categoria.get(
+    percentual_principal_categoria = (
+        quantidade_principal_categoria
+        / clientes_cancelados
+        * 100
+    )
+
+    principal_categoria = traducao_categorias.get(
         principal_categoria,
         principal_categoria
     )
 
-# --- Principal motivo específico --- #
-    motivos = (
-        df[df['Churn Label'] == 'Yes']
-        ['Churn Reason']
+    # --- Identificar os principais motivos --- #
+    principais_motivos = (
+        clientes_que_cancelaram['Churn Reason']
         .value_counts()
+        .head(5)
     )
 
-    principal_motivo = motivos.index[0]
-    quantidade_motivo = motivos.iloc[0]
+    lista_motivos = []
 
-    traducao_motivo = {
-        'Competitor had better devices':
-            'concorrente com melhores equipamentos',
-        'Competitor made better offer':
-            'concorrente com melhor oferta',
-        'Attitude of support person':
-            'atendimento prestado pelo suporte',
-        "Don't know":
-            'motivo não informado',
-        'Competitor offered more data':
-            'concorrente oferecendo maior volume de dados',
-        'Competitor offered higher download speeds':
-            'concorrente oferecendo maior velocidade',
-        'Price too high':
-            'preço considerado elevado',
-        'Product dissatisfaction':
-            'insatisfação com o serviço',
-        'Network reliability':
-            'problemas relacionados à rede'
-    }
+    for motivo, quantidade in principais_motivos.items():
 
-    principal_motivo = traducao_motivo.get(
-        principal_motivo,
-        principal_motivo
-    )
+        motivo_traduzido = traducao_motivos.get(
+            motivo,
+            motivo
+        )
 
-# --- Taxa de churn por contrato --- #
+        percentual_motivo = (
+            quantidade
+            / clientes_cancelados
+            * 100
+        )
+
+        lista_motivos.append(
+            f'- {motivo_traduzido}: '
+            f'{quantidade} clientes '
+            f'({percentual_motivo:.1f}% dos cancelamentos)'
+        )
+
+    texto_motivos = '\n'.join(lista_motivos)
+
+    # --- Calcular a taxa de churn por contrato --- #
     churn_contrato = (
         df
         .assign(Cancelou=df['Churn Label'] == 'Yes')
@@ -83,62 +91,72 @@ def gerar_relatorio(df):
         .sort_values(ascending=False)
     )
 
-    maior_contrato = churn_contrato.index[0]
-    maior_taxa_contrato = churn_contrato.iloc[0]
+    contrato_maior_churn = churn_contrato.index[0]
 
-    traducao_contrato = {
-        'Month-to-Month': 'mensal',
-        'One Year': 'anual',
-        'Two Year': 'de dois anos'
-    }
+    taxa_maior_contrato = churn_contrato.iloc[0]
 
-    maior_contrato = traducao_contrato.get(
-        maior_contrato,
-        maior_contrato
+    contrato_maior_churn = traducao_contratos.get(
+        contrato_maior_churn,
+        contrato_maior_churn
     )
 
-# --- Montar o relatório --- #
+# --- Montar o relatório completo --- #
     relatorio = f"""
 1. RESUMO GERAL
 
-A base analisada contém {total_clientes:,} clientes.
-Desse total, {clientes_cancelados:,} cancelaram os serviços,
-resultando em uma taxa de churn de {taxa_churn:.2f}%.
+A base analisada possui {total_clientes:,} clientes.
+
+Foram identificados {clientes_cancelados:,} cancelamentos,
+o que representa uma taxa de churn de {taxa_churn:.2f}%.
+
 
 2. PRINCIPAIS DESCOBERTAS
 
-A categoria de cancelamento com maior ocorrência foi
-{principal_categoria}, responsável por {quantidade_categoria:,}
-cancelamentos.
+A categoria {principal_categoria} concentrou
+{quantidade_principal_categoria} cancelamentos,
+representando {percentual_principal_categoria:.1f}%
+do total de clientes que deixaram a empresa.
 
-O motivo específico mais frequente foi relacionado a
-{principal_motivo}, registrado por {quantidade_motivo:,} clientes.
+Os principais motivos específicos de cancelamento foram:
 
-Os clientes com contrato {maior_contrato} apresentaram a maior
-taxa de churn, equivalente a {maior_taxa_contrato:.1f}%.
+{texto_motivos}
 
-Também foi observado que clientes com menor satisfação e menor
-tempo de permanência apresentam maior chance de cancelamento.
+Os resultados mostram que os cancelamentos estão
+relacionados principalmente à competitividade das ofertas,
+à qualidade dos serviços oferecidos e à experiência de
+atendimento dos clientes.
+
+O tipo de contrato também apresenta influência importante.
+Os clientes com contrato {contrato_maior_churn} apresentaram
+a maior taxa de churn, equivalente a
+{taxa_maior_contrato:.1f}%.
+
 
 3. RECOMENDAÇÕES
 
-- Criar ações de retenção para os clientes que possuem contratos mensais;
-- Revisar preços, ofertas e benefícios em comparação à concorrência;
-- Oferecer vantagens para a migração dos contratos mensais para contratos anuais;
-- Melhorar a qualidade do suporte e do atendimento ao cliente;
+- Criar campanhas de retenção para clientes com contrato mensal;
+- Revisar preços, benefícios e ofertas em relação à concorrência;
+- Avaliar a qualidade dos equipamentos e serviços oferecidos;
+- Melhorar o atendimento prestado pelo suporte;
+- Oferecer benefícios para a migração do contrato mensal para contratos mais longos;
 - Monitorar clientes com baixa satisfação;
-- Priorizar clientes com alto valor de vida (CLTV);
-- Desenvolver ofertas personalizadas para clientes com maior risco.
+- Criar ofertas personalizadas para clientes com maior risco;
+- Acompanhar continuamente os principais motivos de cancelamento.
+
 
 4. CONCLUSÃO
 
-A empresa apresenta uma taxa de churn relevante, concentrada 
-principalmente em fatores relacionados à concorrência, ao tipo
-de contrato, à satisfação e à experiência do cliente.
+A análise mostra que a concorrência possui forte influência
+sobre os cancelamentos, principalmente por oferecer melhores
+equipamentos, condições comerciais e benefícios.
 
-O acompanhamento desses indicadores pode ajudar a empresa a
-antecipar cancelamentos e desenvolver estratégias de retenção
-mais eficientes.
+Além disso, fatores relacionados ao atendimento, à qualidade
+dos serviços e ao tipo de contrato também contribuem para o churn.
+
+O acompanhamento desses indicadores pode auxiliar a empresa
+na criação de estratégias de retenção mais eficientes e na
+melhoria da experiência dos clientes.
+
 
 Atenciosamente,
 
