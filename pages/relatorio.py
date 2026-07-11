@@ -4,6 +4,7 @@ import streamlit as st
 # --- Importar os módulos do projeto --- #
 from carregar_dados import carregar_dados
 from gerar_relatorio import gerar_relatorio
+from traducao import traducao_motivos
 
 # --- Obter o nome do usuário --- #
 nome_usuario = st.session_state.get(
@@ -43,12 +44,28 @@ taxa_churn = (
     clientes_cancelados / total_clientes * 100
 )
 
-# --- Principal categoria de cancelamento --- #
-principal_categoria = (
+# --- Separar os clientes que cancelaram --- #
+clientes_que_cancelaram = (
     df[df['Churn Label'] == 'Yes']
-    ['Churn Category']
+)
+
+# --- Calcular as categorias de cancelamento --- #
+categorias_cancelamento = (
+    clientes_que_cancelaram['Churn Category']
     .value_counts()
-    .index[0]
+)
+
+# --- Identificar a principal categoria --- #
+principal_categoria = categorias_cancelamento.index[0]
+
+quantidade_principal_categoria = (
+    categorias_cancelamento.iloc[0]
+)
+
+percentual_principal_categoria = (
+    quantidade_principal_categoria
+    / clientes_cancelados
+    * 100
 )
 
 traducao_categoria = {
@@ -58,6 +75,38 @@ traducao_categoria = {
     'Price': 'Preço',
     'Other': 'Outros'
 }
+
+# --- Principais motivos de cancelamento --- #
+principais_motivos = (
+    clientes_que_cancelaram['Churn Reason']
+    .value_counts()
+    .head(5)
+)
+
+# --- Criar uma lista com os motivos traduzidos --- #
+lista_motivos = []
+
+for motivo, quantidade in principais_motivos.items():
+
+    motivo_traduzido = traducao_motivos.get(
+        motivo,
+        motivo
+    )
+
+    percentual = (
+        quantidade
+        / clientes_cancelados
+        * 100
+    )
+
+    lista_motivos.append(
+        f'- **{motivo_traduzido}**: '
+        f'{quantidade} clientes '
+        f'({percentual:.1f}% dos cancelamentos);'
+    )
+
+# --- Juntar os motivos em um único texto --- #
+texto_motivos = '\n'.join(lista_motivos)
 
 principal_categoria = traducao_categoria.get(
     principal_categoria,
@@ -103,16 +152,30 @@ st.success(
 )
 
 # --- Mostrar as principais descobertas --- #
-st.markdown("##### 📊 Principais descobertas")
+st.markdown('### 📊 Principais descobertas')
 
 st.info(
     f'''
-    - A taxa de churn é de **{taxa_churn:.2f}%**;
-    - A categoria com maior número de cancelamentos é **{principal_categoria}**;
-    - O contrato com maior taxa de churn é **{contrato_maior_churn}**,
-      com **{taxa_maior_contrato:.1f}%**;
-    - Clientes com menor satisfação apresentam maior risco de cancelamento;
-    - Clientes com menor tempo de permanência tendem a cancelar com mais frequência.
+A taxa de churn identificada foi de **{taxa_churn:.2f}%**,
+representando **{clientes_cancelados:,} clientes cancelados**.
+
+A categoria **{principal_categoria}** apresentou
+**{quantidade_principal_categoria} cancelamentos**,
+o equivalente a **{percentual_principal_categoria:.1f}%**
+de todos os clientes que deixaram a empresa.
+
+Os principais motivos específicos de cancelamento foram:
+
+{texto_motivos}
+
+Além dos motivos informados pelos clientes, o tipo de contrato
+também apresenta influência importante. Os clientes com contrato
+**{contrato_maior_churn}** apresentaram a maior taxa de churn,
+com **{taxa_maior_contrato:.1f}%**.
+
+Os resultados indicam que os cancelamentos estão relacionados
+principalmente à competitividade das ofertas, à qualidade dos
+serviços e à experiência do atendimento.
     '''
 )
 
