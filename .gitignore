@@ -1,0 +1,13 @@
+# Ambiente virtual
+.venv/
+
+# Credenciais
+.streamlit/secrets.toml
+
+# Cache do Python
+__pycache__/
+*.pyc
+
+# Arquivos do PyCharm
+.idea/
+*.iml
