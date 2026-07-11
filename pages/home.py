@@ -20,15 +20,15 @@ else:
     st.subheader('Bem-vindo(a)!')
 
 # --- Resumo --- #
-st.header('Análise de Cancelamento dos Clientes')
+st.header('Análise Estratégica de Churn')
 st.write(
-    'Esse projeto foi desenvolvido para analisar os cancelamentos '
-    'dos clientes de uma empresa de telecomunicações.'
+    'Este projeto foi desenvolvido para analisar o churn de clientes '
+    'de uma empresa de telecomunicações.'
 )
 st.write(
     'O objetivo é identificar os principais motivos dos cancelamentos, '
     'avaliar o perfil dos clientes que realizaram os cancelamentos e apresentar '
-    'informações que auxiliem a empresa na tomada de decisão.'
+    'informações que auxiliem na tomada de decisão.'
 )
 
 # --- Divisor --- #
