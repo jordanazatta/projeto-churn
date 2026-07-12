@@ -57,6 +57,12 @@ if tipo_envio == 'Gráfico estático':
         ]
     )
 
+# --- Aviso sobre o recebimento do e-mail --- #
+st.info(
+    'O e-mail pode ser direcionado para a caixa de spam ou lixo eletrônico. '
+    'Caso não apareça na caixa de entrada, verifique essas pastas.'
+)
+
 # --- Formulário do e-mail --- #
 with st.form('formulario_email'):
 
@@ -222,7 +228,10 @@ Jordana Zatta Prado
 
 # --- Mostrar o resultado --- #
             if sucesso:
-                st.success(mensagem)
+                st.success(
+                    'E-mail enviado com sucesso! '
+                    'Caso não apareça na caixa de entrada, verifique a pasta de spam '
+                    'ou lixo eletrônico.')
 
             else:
                 st.error(mensagem)
